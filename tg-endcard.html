@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>喰種 エンディングカード</title>
+<style>
+:root{
+  --paper:#E4E2DB; --paper-hi:#F1EFE9;
+  --ink:#16161A; --ink-mid:#4A4842; --ink-soft:#7C796F; --rule:#C6C3B9;
+  --odd:#0B3FC7; --even:#D4004E; --high:#0A7A4B; --sp:#6A1FB0;
+  --marker:#F3E64A;
+  --sans:"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,"Hiragino Kaku Gothic ProN",monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+button,input{font:inherit;color:inherit}
+button{background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--odd);outline-offset:2px}
+
+.hdr{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1.5px solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 14px 10px}
+.hdr-row{display:flex;align-items:baseline;gap:10px}
+h1{font-size:19px;font-weight:800;letter-spacing:-.04em;margin:0;line-height:1.2}
+h1 .sub{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--ink-soft);font-weight:400;margin-top:3px}
+.reset{margin-left:auto;border:1.5px solid var(--ink);padding:6px 10px;font-size:12.5px;font-weight:700}
+
+.verdict{margin-top:10px;border:1.5px solid var(--ink);background:var(--paper-hi);padding:9px 10px}
+.vlabel{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;color:var(--ink-soft)}
+.settei{display:flex;gap:6px;margin-top:6px}
+.settei span{flex:1;text-align:center;font-family:var(--mono);font-size:17px;font-weight:700;padding:5px 0;border:1.5px solid var(--ink);background:var(--paper)}
+.settei span.out{color:var(--rule);border-color:var(--rule);background:transparent;text-decoration:line-through}
+.settei span.only{background:var(--ink);color:var(--paper)}
+.tally{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;font-size:12.5px}
+.tally b{font-family:var(--mono);font-size:14px}
+.t-odd{color:var(--odd)} .t-even{color:var(--even)} .t-high{color:var(--high)}
+.reason{font-size:11.5px;color:var(--ink-mid);margin-top:6px;line-height:1.5}
+
+.find{width:100%;margin-top:9px;background:var(--paper-hi);border:1.5px solid var(--ink);padding:8px 10px;font-size:16px;appearance:none;-webkit-appearance:none}
+
+main{padding:0 0 90px}
+.group{padding:16px 14px 0}
+.ghead{display:flex;align-items:center;gap:8px;border-bottom:1.5px solid var(--ink);padding-bottom:4px;margin-bottom:8px}
+.swatch{width:16px;height:16px;border:1.5px solid var(--ink);flex:none}
+.ghead b{font-size:14px;font-weight:800}
+.ghead span{font-family:var(--mono);font-size:9.5px;color:var(--ink-soft);margin-left:auto}
+
+.card{display:flex;align-items:stretch;gap:0;border:1.5px solid var(--ink);background:var(--paper-hi);margin-bottom:9px;overflow:hidden}
+.card.dim{opacity:.28}
+.card .bar{width:6px;flex:none}
+.card .main{flex:1;min-width:0;padding:9px 10px;text-align:left}
+.card .name{font-size:15px;font-weight:800;line-height:1.35}
+.card .chars{font-size:11.5px;color:var(--ink-mid);line-height:1.5;margin-top:3px;word-break:break-word}
+.card .chars mark{background:var(--marker);padding:0 2px}
+.card .cnt{flex:none;width:52px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:22px;font-weight:700;border-left:1.5px solid var(--ink);background:var(--paper)}
+.card .cnt.on{background:var(--ink);color:var(--paper)}
+.card .minus{flex:none;width:40px;border-left:1.5px solid var(--ink);font-size:20px;font-weight:700;color:var(--ink-soft);display:flex;align-items:center;justify-content:center}
+.card .main:active{background:var(--paper)}
+
+.note{padding:18px 14px 40px;font-size:11.5px;color:var(--ink-soft);line-height:1.7}
+.shot{position:fixed;inset:0;z-index:70;background:rgba(22,22,26,.94);display:none;overflow:auto;-webkit-overflow-scrolling:touch}
+.shot.open{display:block}
+.shotbar{position:sticky;top:0;display:flex;gap:10px;align-items:center;padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;background:rgba(22,22,26,.9)}
+.shotbar button,.shotbar a{color:#fff;font-size:13.5px;font-weight:700;text-decoration:none;border:1.5px solid rgba(255,255,255,.55);padding:6px 10px}
+.shot img{display:block;width:calc(100% - 24px);height:auto;margin:0 12px 12px}
+.shothint{color:#DCD9D1;font-size:12px;padding:0 16px 40px;line-height:1.7}
+
+.shotwrap{position:fixed;inset:0;z-index:70;background:rgba(22,22,26,.95);display:none;overflow:auto;-webkit-overflow-scrolling:touch}
+.shotwrap.open{display:block}
+.shotbar{position:sticky;top:0;display:flex;gap:10px;align-items:center;padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;background:rgba(22,22,26,.9)}
+.shotbar button{color:#fff;font-size:13.5px;font-weight:700;border:1.5px solid rgba(255,255,255,.55);padding:6px 10px}
+.shotbar button#shareBtn{margin-left:auto;background:#fff;color:#16161A;border-color:#fff}
+.shotbody{padding:0 12px}
+.shotbody img{display:block;width:100%;height:auto}
+.shothint{color:#DCD9D1;font-size:12px;padding:12px 16px calc(env(safe-area-inset-bottom) + 40px);line-height:1.6}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%) translateY(8px);background:var(--ink);color:var(--paper);font-size:13px;font-weight:700;padding:10px 16px;z-index:80;opacity:0;pointer-events:none;transition:.18s}
+.toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-row">
+    <h1>エンディングカード<span class="sub">L TOKYO GHOUL / ENDING CARD</span></h1>
+    <button class="reset" id="shotBtn">画像</button>
+    <button class="reset" id="shotBtn">画像</button>
+    <button class="reset" id="resetBtn">リセット</button>
+  </div>
+
+  <div class="verdict">
+    <div class="vlabel">REMAINING SETTING</div>
+    <div class="settei" id="settei"></div>
+    <div class="tally" id="tally"></div>
+    <div class="reason" id="reason"></div>
+  </div>
+
+  <input type="text" class="find" id="memo" placeholder="店名・台番号（画像に入ります）" autocomplete="off">
+  <input type="search" class="find" id="find" placeholder="キャラ名で探す（例：霧嶋）" autocomplete="off">
+</header>
+
+<main id="list"></main>
+<div class="shot" id="shot"></div>
+<div class="shotwrap" id="shotwrap">
+  <div class="shotbar">
+    <button data-shot="close">✕ 閉じる</button>
+    <button data-shot="share" id="shareBtn">共有・保存</button>
+  </div>
+  <div class="shotbody"><img id="shotimg" alt="集計結果"></div>
+  <div class="shothint">「共有・保存」が使えない場合は、画像を長押しして「"写真"に保存」を選んでください。</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+var KEY="tg-endcard-v1";
+
+var GROUPS=[
+  { color:"白カード", swatch:"#FFFFFF", hex:"#FFFFFF", buckets:[
+    { id:"w1", name:"奇数設定示唆（弱）", chars:["金木研","霧嶋董香","笛口雛実","永近英良","西尾錦","月山習"], type:"odd" },
+    { id:"w2", name:"奇数設定示唆（強）", chars:["芳村","四方蓮示","ウタ","イトリ","古間円児","入見カヤ"], type:"odd" }
+  ]},
+  { color:"青カード", swatch:"#2E6BE6", hex:"#2E6BE6", buckets:[
+    { id:"b1", name:"偶数設定示唆（弱）", chars:["金木研","霧嶋董香","笛口雛実","ナキ","西尾錦","月山習"], type:"even" },
+    { id:"b2", name:"偶数設定示唆（強）", chars:["亜門鋼太朗","篠原幸紀","滝澤政道","真戸暁","真戸呉緒","丸手斎"], type:"even" }
+  ]},
+  { color:"赤カード", swatch:"#D4004E", hex:"#D4004E", buckets:[
+    { id:"r1", name:"高設定示唆（弱）", chars:["金木研","霧嶋董香","ヤモリ","霧嶋絢都"], type:"high" },
+    { id:"r2", name:"高設定示唆（強）", chars:["鯱","亜門鋼太朗","篠原幸紀","鈴屋什造"], type:"high" }
+  ]},
+  { color:"特殊カード（銅）", swatch:"#A9743B", hex:"#A9743B", buckets:[
+    { id:"c1", name:"設定1否定", chars:["鈴屋什造"], deny:[1] },
+    { id:"c2", name:"設定2否定", chars:["高槻泉"], deny:[2] },
+    { id:"c3", name:"設定3否定", chars:["梟"], deny:[3] },
+    { id:"c4", name:"設定4否定", chars:["エト"], deny:[4] }
+  ]},
+  { color:"特殊カード（銀）", swatch:"#B9BCC0", hex:"#B9BCC0", buckets:[
+    { id:"s1", name:"設定3以上", chars:["金木研"], deny:[1,2] }
+  ]},
+  { color:"特殊カード（金）", swatch:"#D8A521", hex:"#D8A521", buckets:[
+    { id:"g1", name:"設定4以上", chars:["神代利世"], deny:[1,2,3] },
+    { id:"g2", name:"設定5以上", chars:["隻眼の梟"], deny:[1,2,3,4] }
+  ]},
+  { color:"特殊カード（虹）", swatch:"linear-gradient(90deg,#D4004E,#D8A521,#0A7A4B,#0B3FC7,#6A1FB0)", rainbow:true, buckets:[
+    { id:"n1", name:"設定6", chars:["有馬貴将"], deny:[1,2,3,4,5] }
+  ]}
+];
+
+var counts={};
+try{ var r=localStorage.getItem(KEY); if(r) counts=JSON.parse(r)||{}; }catch(e){ counts={}; }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(counts)); }catch(e){} }
+
+var listEl=document.getElementById("list");
+var toastEl=document.getElementById("toast");
+var tId=null, query="";
+
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function toast(m){ toastEl.textContent=m; toastEl.classList.add("show"); clearTimeout(tId);
+  tId=setTimeout(function(){ toastEl.classList.remove("show"); },1500); }
+function toKata(s){ return String(s||"").replace(/[\u3041-\u3096]/g,function(ch){ return String.fromCharCode(ch.charCodeAt(0)+0x60); }); }
+
+function allBuckets(){
+  var a=[]; GROUPS.forEach(function(g){ g.buckets.forEach(function(b){ b._g=g; a.push(b); }); }); return a;
+}
+function hit(b){
+  if(!query) return true;
+  var q=toKata(query).toLowerCase();
+  if(toKata(b.name).toLowerCase().indexOf(q)>=0) return true;
+  for(var i=0;i<b.chars.length;i++) if(toKata(b.chars[i]).toLowerCase().indexOf(q)>=0) return true;
+  return false;
+}
+function charsHTML(b){
+  var q=query?toKata(query).toLowerCase():"";
+  return b.chars.map(function(c){
+    if(q && toKata(c).toLowerCase().indexOf(q)>=0) return "<mark>"+esc(c)+"</mark>";
+    return esc(c);
+  }).join("・");
+}
+
+function render(){
+  var html="";
+  GROUPS.forEach(function(g){
+    var rows="";
+    g.buckets.forEach(function(b){
+      var n=counts[b.id]||0;
+      rows+='<div class="card'+(hit(b)?"":" dim")+'" data-id="'+b.id+'">'
+        + '<div class="bar" style="background:'+g.swatch+'"></div>'
+        + '<button class="main" data-plus="'+b.id+'">'
+        +   '<div class="name">'+esc(b.name)+'</div>'
+        +   '<div class="chars">'+charsHTML(b)+'</div>'
+        + '</button>'
+        + '<button class="minus" data-minus="'+b.id+'" aria-label="1減らす">−</button>'
+        + '<div class="cnt'+(n?" on":"")+'">'+n+'</div>'
+        + '</div>';
+    });
+    html+='<section class="group"><div class="ghead">'
+      + '<i class="swatch" style="background:'+g.swatch+'"></i><b>'+esc(g.color)+'</b>'
+      + '</div>'+rows+'</section>';
+  });
+  html+='<div class="note">タップで+1、「−」で−1。カードはPUSHボタンで履歴を確認できます。<br>'
+      + 'カウントはこの端末に保存され、リセットするまで残ります。</div>';
+  listEl.innerHTML=html;
+  renderVerdict();
+}
+
+function renderVerdict(){
+  var deny={}, reasons=[];
+  allBuckets().forEach(function(b){
+    if((counts[b.id]||0)>0 && b.deny){
+      b.deny.forEach(function(s){ deny[s]=true; });
+      reasons.push(b.name);
+    }
+  });
+  var alive=[];
+  for(var s=1;s<=6;s++) if(!deny[s]) alive.push(s);
+  var only=(alive.length===1);
+  var h="";
+  for(s=1;s<=6;s++){
+    var cls=deny[s]?"out":(only?"only":"");
+    h+='<span class="'+cls+'">'+s+'</span>';
+  }
+  document.getElementById("settei").innerHTML=h;
+
+  var odd=0,even=0,high=0;
+  allBuckets().forEach(function(b){
+    var n=counts[b.id]||0;
+    if(b.type==="odd") odd+=n;
+    if(b.type==="even") even+=n;
+    if(b.type==="high") high+=n;
+  });
+  document.getElementById("tally").innerHTML=
+      '<span class="t-odd">奇数 <b>'+odd+'</b></span>'
+    + '<span class="t-even">偶数 <b>'+even+'</b></span>'
+    + '<span class="t-high">高設定 <b>'+high+'</b></span>'
+    + '<span>合計 <b>'+(function(){var t=0;allBuckets().forEach(function(b){t+=counts[b.id]||0;});return t;})()+'</b></span>';
+
+  var rz=document.getElementById("reason");
+  if(reasons.length) rz.textContent="根拠：" + reasons.join(" / ");
+  else rz.textContent="濃厚系のカードはまだ出ていません。";
+}
+
+listEl.addEventListener("click",function(e){
+  var p=e.target.closest("[data-plus]");
+  if(p){ var id=p.dataset.plus; counts[id]=(counts[id]||0)+1; save(); render(); return; }
+  var m=e.target.closest("[data-minus]");
+  if(m){ var id2=m.dataset.minus; counts[id2]=Math.max(0,(counts[id2]||0)-1); save(); render(); }
+});
+
+document.getElementById("find").addEventListener("input",function(e){
+  query=e.target.value.trim(); render();
+});
+
+document.getElementById("resetBtn").addEventListener("click",function(){
+  if(!confirm("カウントを全てリセットします。よろしいですか？")) return;
+  counts={}; save(); render(); toast("リセットしました");
+});
+
+/* ---------- 結果を1枚の画像に出力 ---------- */
+var memoEl=document.getElementById("memo");
+try{ var mv=localStorage.getItem(KEY+"-memo"); if(mv) memoEl.value=mv; }catch(e){}
+memoEl.addEventListener("input",function(){
+  try{ localStorage.setItem(KEY+"-memo",memoEl.value); }catch(e){}
+});
+
+function wrapText(ctx,text,maxW){
+  var lines=[],line="",i,t;
+  for(i=0;i<text.length;i++){
+    t=line+text.charAt(i);
+    if(ctx.measureText(t).width>maxW && line){ lines.push(line); line=text.charAt(i); }
+    else line=t;
+  }
+  if(line) lines.push(line);
+  return lines;
+}
+function F(w,size){ return w+" "+size+'px "Hiragino Kaku Gothic ProN","Hiragino Sans",sans-serif'; }
+function MF(size){ return "700 "+size+'px ui-monospace,Menlo,"Hiragino Kaku Gothic ProN",monospace'; }
+
+function buildShot(){
+  var S=2, W=760, PAD=28, s, i;
+
+  var used=[];
+  GROUPS.forEach(function(g){
+    var bs=g.buckets.filter(function(b){ return (counts[b.id]||0)>0; });
+    if(bs.length) used.push({g:g,bs:bs});
+  });
+
+  var deny={}, reasons=[];
+  allBuckets().forEach(function(b){
+    if((counts[b.id]||0)>0 && b.deny){
+      b.deny.forEach(function(v){ deny[v]=true; });
+      reasons.push(b.name);
+    }
+  });
+  var alive=[]; for(s=1;s<=6;s++) if(!deny[s]) alive.push(s);
+
+  var odd=0,even=0,high=0,total=0;
+  allBuckets().forEach(function(b){
+    var n=counts[b.id]||0; total+=n;
+    if(b.type==="odd") odd+=n;
+    if(b.type==="even") even+=n;
+    if(b.type==="high") high+=n;
+  });
+
+  var memo=(memoEl.value||"").trim();
+  var d=new Date();
+  var stamp=d.getFullYear()+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+("0"+d.getDate()).slice(-2)
+          +" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+
+  var H=104+(memo?42:0)+26+72+54+70;
+  used.forEach(function(u){ H+=40+u.bs.length*44+12; });
+  if(!used.length) H+=60;
+
+  var cv=document.createElement("canvas");
+  var x=cv.getContext("2d");
+  x.font=F("400",15);
+  var reasonLines=reasons.length
+    ? wrapText(x,"根拠："+reasons.join(" / "),W-PAD*2)
+    : ["濃厚系のカードは出ていません"];
+  H+=(reasonLines.length-1)*22;
+
+  cv.width=W*S; cv.height=H*S;
+  x=cv.getContext("2d"); x.scale(S,S); x.textBaseline="top";
+
+  x.fillStyle="#E4E2DB"; x.fillRect(0,0,W,H);
+
+  var y=0;
+  x.fillStyle="#16161A"; x.fillRect(0,0,W,88);
+  x.fillStyle="#ffffff"; x.font=F("800",30);
+  x.fillText("エンディングカード集計",PAD,20);
+  x.fillStyle="#B9B6AD"; x.font=MF(15);
+  x.fillText("L TOKYO GHOUL   "+stamp,PAD,58);
+  y=104;
+
+  if(memo){
+    x.fillStyle="#16161A"; x.font=F("700",19);
+    x.fillText(memo,PAD,y); y+=42;
+  }
+
+  x.fillStyle="#7C796F"; x.font=MF(13);
+  x.fillText("REMAINING SETTING",PAD,y); y+=26;
+
+  var bw=(W-PAD*2-5*8)/6;
+  for(i=0;i<6;i++){
+    var st=i+1, bx=PAD+i*(bw+8), out=!!deny[st], only=(alive.length===1&&!out);
+    x.lineWidth=2;
+    if(only){ x.fillStyle="#16161A"; x.fillRect(bx,y,bw,58); x.fillStyle="#E4E2DB"; }
+    else{
+      x.fillStyle="#F1EFE9"; x.fillRect(bx,y,bw,58);
+      x.strokeStyle=out?"#C6C3B9":"#16161A"; x.strokeRect(bx+1,y+1,bw-2,56);
+      x.fillStyle=out?"#C6C3B9":"#16161A";
+    }
+    x.font=MF(30);
+    var tw=x.measureText(String(st)).width;
+    x.fillText(String(st),bx+(bw-tw)/2,y+13);
+    if(out){
+      x.strokeStyle="#C6C3B9"; x.lineWidth=2;
+      x.beginPath(); x.moveTo(bx+10,y+29); x.lineTo(bx+bw-10,y+29); x.stroke();
+    }
+  }
+  y+=72;
+
+  x.font=F("700",17);
+  var tallies=[["奇数",odd,"#0B3FC7"],["偶数",even,"#D4004E"],["高設定",high,"#0A7A4B"],["合計",total,"#16161A"]];
+  var tx=PAD;
+  tallies.forEach(function(t){
+    x.fillStyle=t[2];
+    var label=t[0]+" "+t[1];
+    x.fillText(label,tx,y+8);
+    tx+=x.measureText(label).width+26;
+  });
+  y+=54;
+
+  if(!used.length){
+    x.fillStyle="#7C796F"; x.font=F("400",17);
+    x.fillText("カードのカウントがありません",PAD,y+12);
+    y+=60;
+  }
+  used.forEach(function(u){
+    x.fillStyle="#16161A"; x.fillRect(PAD,y+22,W-PAD*2,2);
+    x.font=F("800",17);
+    x.fillText(u.g.color,PAD+24,y);
+    if(/linear-gradient/.test(u.g.swatch)){
+      var gr=x.createLinearGradient(PAD,y,PAD+18,y);
+      gr.addColorStop(0,"#D4004E"); gr.addColorStop(.5,"#D8A521"); gr.addColorStop(1,"#0B3FC7");
+      x.fillStyle=gr;
+    } else x.fillStyle=u.g.swatch;
+    x.fillRect(PAD,y+1,18,18);
+    x.strokeStyle="#16161A"; x.lineWidth=2; x.strokeRect(PAD+1,y+2,16,16);
+    y+=40;
+
+    u.bs.forEach(function(b){
+      var n=counts[b.id]||0;
+      x.fillStyle="#F1EFE9"; x.fillRect(PAD,y,W-PAD*2,38);
+      x.fillStyle="#16161A"; x.font=F("700",18);
+      x.fillText(b.name,PAD+12,y+9);
+      x.font=MF(22);
+      var nt=String(n)+" 枚";
+      var ntw=x.measureText(nt).width;
+      x.fillText(nt,W-PAD-12-ntw,y+7);
+      y+=44;
+    });
+    y+=12;
+  });
+
+  x.fillStyle="#4A4842"; x.font=F("400",15);
+  reasonLines.forEach(function(l){ x.fillText(l,PAD,y); y+=22; });
+
+  return cv;
+}
+
+function openShot(){
+  var cv;
+  try{ cv=buildShot(); }catch(e){ toast("画像を作成できませんでした"); return; }
+  var url;
+  try{ url=cv.toDataURL("image/png"); }catch(e){ toast("画像を作成できませんでした"); return; }
+  var shot=document.getElementById("shot");
+  shot.innerHTML='<div class="shotbar">'
+    + '<button data-shot="close">✕ 閉じる</button>'
+    + '<button data-shot="share">共有／保存</button>'
+    + '</div><img src="'+url+'" alt="集計結果">'
+    + '<div class="shothint">画像を長押しして「”写真”に保存」でも保存できます。</div>';
+  shot._url=url;
+  shot.classList.add("open");
+  shot.scrollTop=0;
+}
+document.getElementById("shot").addEventListener("click",function(e){
+  var b=e.target.closest("[data-shot]");
+  if(!b) return;
+  var shot=document.getElementById("shot");
+  if(b.dataset.shot==="close"){ shot.classList.remove("open"); shot.innerHTML=""; return; }
+  var url=shot._url;
+  fetch(url).then(function(r){ return r.blob(); }).then(function(blob){
+    var name="endcard-"+new Date().toISOString().slice(0,10)+".png";
+    var file=null;
+    try{ file=new File([blob],name,{type:"image/png"}); }catch(e){}
+    if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file]}).catch(function(){});
+    }else{
+      var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
+    }
+  }).catch(function(){ toast("画像を長押しして保存してください"); });
+});
+document.getElementById("shotBtn").addEventListener("click",openShot);
+
+/* ---------- 結果を1枚の画像に出力 ---------- */
+var S=2, W=760;
+var JP='"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif';
+function f(weight,size){ return weight+" "+(size*S)+"px "+JP; }
+function wrapText(ctx,text,maxW){
+  var lines=[], line="";
+  for(var i=0;i<text.length;i++){
+    var ch=text.charAt(i);
+    if(ch==="\n"){ lines.push(line); line=""; continue; }
+    if(ctx.measureText(line+ch).width>maxW && line){ lines.push(line); line=ch; }
+    else line+=ch;
+  }
+  if(line) lines.push(line);
+  return lines;
+}
+function swatchFill(ctx,g,x,y,w,h){
+  if(g.rainbow){
+    var gr=ctx.createLinearGradient(x,y,x+w,y);
+    gr.addColorStop(0,"#D4004E"); gr.addColorStop(.25,"#D8A521");
+    gr.addColorStop(.5,"#0A7A4B"); gr.addColorStop(.75,"#0B3FC7"); gr.addColorStop(1,"#6A1FB0");
+    ctx.fillStyle=gr;
+  }else ctx.fillStyle=g.hex||"#999999";
+  ctx.fillRect(x,y,w,h);
+  ctx.strokeStyle="#16161A"; ctx.lineWidth=1.5*S;
+  ctx.strokeRect(x,y,w,h);
+}
+function buildShot(){
+  var deny={}, reasons=[], total=0, odd=0, even=0, high=0;
+  allBuckets().forEach(function(b){
+    var n=counts[b.id]||0; total+=n;
+    if(b.type==="odd") odd+=n;
+    if(b.type==="even") even+=n;
+    if(b.type==="high") high+=n;
+    if(n>0 && b.deny){ b.deny.forEach(function(s){ deny[s]=true; }); reasons.push(b.name); }
+  });
+  var alive=[]; for(var s=1;s<=6;s++) if(!deny[s]) alive.push(s);
+
+  var c=document.createElement("canvas");
+  var ctx=c.getContext("2d");
+  var PAD=22*S, IW=W*S-PAD*2;
+
+  /* 高さを先に計算 */
+  var y=0;
+  y+=PAD+34*S;              /* タイトル */
+  y+=20*S;                  /* 日時 */
+  y+=18*S+54*S;             /* 設定候補 */
+  y+=30*S;                  /* 集計行 */
+  ctx.font=f("400",12);
+  var reasonText=reasons.length?("濃厚系："+reasons.join(" / ")):"濃厚系のカードなし";
+  var rLines=wrapText(ctx,reasonText,IW);
+  y+=rLines.length*17*S+14*S;
+
+  var drawn=[];
+  GROUPS.forEach(function(g){
+    var rows=g.buckets.filter(function(b){ return (counts[b.id]||0)>0; });
+    if(!rows.length) return;
+    drawn.push({g:g,rows:rows});
+    y+=26*S;                /* グループ見出し */
+    rows.forEach(function(b){
+      ctx.font=f("400",11);
+      var cl=wrapText(ctx,b.chars.join("・"),IW-90*S);
+      y+=22*S+cl.length*15*S+10*S;
+      b._cl=cl;
+    });
+    y+=6*S;
+  });
+  if(!drawn.length) y+=40*S;
+  y+=PAD+26*S;              /* フッター */
+
+  c.width=W*S; c.height=y;
+
+  /* 描画 */
+  ctx.fillStyle="#E4E2DB"; ctx.fillRect(0,0,c.width,c.height);
+  var cy=PAD;
+
+  ctx.fillStyle="#16161A";
+  ctx.font=f("800",26);
+  ctx.textBaseline="top";
+  ctx.fillText("エンディングカード集計",PAD,cy);
+  cy+=34*S;
+
+  var d=new Date();
+  var stamp=d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+" "
+    +("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+  ctx.font=f("400",12); ctx.fillStyle="#7C796F";
+  ctx.fillText("L 東京喰種　"+stamp,PAD,cy);
+  cy+=20*S;
+
+  ctx.font=f("400",10); ctx.fillStyle="#7C796F";
+  ctx.fillText("REMAINING SETTING",PAD,cy);
+  cy+=18*S;
+
+  var bw=(IW-5*8*S)/6, bh=44*S;
+  for(var i=0;i<6;i++){
+    var st=i+1, x=PAD+i*(bw+8*S), out=!!deny[st], only=(alive.length===1&&!out);
+    ctx.fillStyle=only?"#16161A":(out?"transparent":"#F1EFE9");
+    if(only||!out){ ctx.fillRect(x,cy,bw,bh); }
+    ctx.strokeStyle=out?"#C6C3B9":"#16161A"; ctx.lineWidth=1.5*S;
+    ctx.strokeRect(x,cy,bw,bh);
+    ctx.fillStyle=only?"#E4E2DB":(out?"#C6C3B9":"#16161A");
+    ctx.font=f("700",22);
+    var tw=ctx.measureText(String(st)).width;
+    ctx.fillText(String(st),x+(bw-tw)/2,cy+10*S);
+    if(out){
+      ctx.strokeStyle="#C6C3B9"; ctx.lineWidth=2*S;
+      ctx.beginPath(); ctx.moveTo(x+8*S,cy+bh/2); ctx.lineTo(x+bw-8*S,cy+bh/2); ctx.stroke();
+    }
+  }
+  cy+=bh+10*S;
+
+  ctx.font=f("700",14);
+  var segs=[["奇数 "+odd,"#0B3FC7"],["偶数 "+even,"#D4004E"],["高設定 "+high,"#0A7A4B"],["合計 "+total,"#16161A"]];
+  var sx=PAD;
+  segs.forEach(function(sg){
+    ctx.fillStyle=sg[1]; ctx.fillText(sg[0],sx,cy);
+    sx+=ctx.measureText(sg[0]).width+22*S;
+  });
+  cy+=30*S;
+
+  ctx.font=f("400",12); ctx.fillStyle="#4A4842";
+  rLines.forEach(function(L){ ctx.fillText(L,PAD,cy); cy+=17*S; });
+  cy+=14*S;
+
+  if(!drawn.length){
+    ctx.font=f("400",14); ctx.fillStyle="#7C796F";
+    ctx.fillText("カードのカウントはまだありません。",PAD,cy);
+    cy+=40*S;
+  }
+  drawn.forEach(function(D){
+    swatchFill(ctx,D.g,PAD,cy+2*S,16*S,16*S);
+    ctx.fillStyle="#16161A"; ctx.font=f("800",14);
+    ctx.fillText(D.g.color,PAD+24*S,cy);
+    cy+=22*S;
+    ctx.strokeStyle="#16161A"; ctx.lineWidth=1.5*S;
+    ctx.beginPath(); ctx.moveTo(PAD,cy); ctx.lineTo(PAD+IW,cy); ctx.stroke();
+    cy+=4*S;
+
+    D.rows.forEach(function(b){
+      var n=counts[b.id]||0;
+      ctx.fillStyle="#16161A"; ctx.font=f("700",15);
+      ctx.fillText(b.name,PAD,cy);
+      ctx.font=f("700",20);
+      var nt=n+"枚", nw=ctx.measureText(nt).width;
+      ctx.fillText(nt,PAD+IW-nw,cy-3*S);
+      cy+=22*S;
+      ctx.fillStyle="#4A4842"; ctx.font=f("400",11);
+      b._cl.forEach(function(L){ ctx.fillText(L,PAD,cy); cy+=15*S; });
+      cy+=10*S;
+      ctx.strokeStyle="#C6C3B9"; ctx.lineWidth=1*S;
+      ctx.beginPath(); ctx.moveTo(PAD,cy-5*S); ctx.lineTo(PAD+IW,cy-5*S); ctx.stroke();
+    });
+    cy+=6*S;
+  });
+
+  ctx.fillStyle="#7C796F"; ctx.font=f("400",10);
+  ctx.fillText("狙い目辞典 / エンディングカードカウンター",PAD,c.height-PAD-12*S);
+
+  return c;
+}
+
+var shotWrap=document.getElementById("shotwrap");
+var shotImg=document.getElementById("shotimg");
+var shotBlob=null;
+
+function openShot(){
+  var c=buildShot();
+  try{ shotImg.src=c.toDataURL("image/png"); }catch(e){ toast("画像を作成できませんでした"); return; }
+  shotBlob=null;
+  if(c.toBlob) c.toBlob(function(b){ shotBlob=b; },"image/png");
+  shotWrap.classList.add("open");
+  shotWrap.scrollTop=0;
+}
+shotWrap.addEventListener("click",function(e){
+  var b=e.target.closest("[data-shot]");
+  if(!b) return;
+  if(b.dataset.shot==="close"){ shotWrap.classList.remove("open"); return; }
+  if(b.dataset.shot==="share"){
+    var file=null;
+    try{
+      if(shotBlob && window.File) file=new File([shotBlob],"endcard.png",{type:"image/png"});
+    }catch(e){}
+    if(file && navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:"エンディングカード集計"}).catch(function(){});
+    }else{
+      toast("画像を長押しして保存してください");
+    }
+  }
+});
+document.getElementById("shotBtn").addEventListener("click",openShot);
+
+render();
+})();
+</script>
+</body>
+</html>
